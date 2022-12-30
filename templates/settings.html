@@ -7,7 +7,7 @@
 .body {
   background: rgba(5, 17, 56, 0.089);
 }
-.sliderr {
+.slider {
 	display: flex;
 	margin-top: 10px;
 }
@@ -41,32 +41,38 @@
   Show contours:
   <input type="checkbox" id="showConts" name="showConts" checked onchange="checkbox()">
 </div>
-<div class="sliderr" >
+<div class="slider" >
+Moments pixels:
+<input id="mom_pix" type="range" min="0" value="5" max="100">
+<div id="box-0">20</div>
+</div>
+<br>
+<div class="slider" >
 h1:
 <input id="num-1" type="range" min="0" value="0" max="255">
 <div id="box-1">0</div>
 </div>
-<div class="sliderr" >
+<div class="slider" >
 s1:
 <input id="num-2" type="range" min="0" value="0" max="255">
 <div id="box-2">0</div>
 </div>
-<div class="sliderr" >
+<div class="slider" >
 v1:
 <input id="num-3" type="range" min="0" value="0" max="255">
 <div id="box-3">0</div>
 </div>
-<div class="sliderr" >
+<div class="slider" >
 h2:
 <input id="num-4" type="range" min="0" value="255" max="255">
 <div id="box-4">255</div>
 </div>
-<div class="sliderr" >
+<div class="slider" >
 s2:
 <input id="num-5" type="range" min="0" value="255" max="255">
 <div id="box-5">255</div>
 </div>
-<div class="sliderr" >
+<div class="slider" >
 v2:
 <input id="num-6" type="range" min="0" value="255" max="255">
 <div id="box-6">255</div>
@@ -108,6 +114,7 @@ v2:
 
   function sendValues() {
   // Получаем значения слайдеров
+  var slider0 = document.getElementById("mom_pix").value;
   var slider1 = document.getElementById("num-1").value;
   var slider2 = document.getElementById("num-2").value;
   var slider3 = document.getElementById("num-3").value;
@@ -126,6 +133,7 @@ v2:
 
   // Отправляем данные в формате JSON
   xhr.send(JSON.stringify({
+    slider0: slider0,
     slider1: slider1,
     slider2: slider2,
     slider3: slider3,
@@ -158,6 +166,14 @@ document.getElementById('num-1').addEventListener // добавляем собы
     'input', // на ввод
     function name(e){ // задаём имя, чтобы потом можно было сбросить  выполнение функции на событие
       document.getElementById('box-1').innerText = this.value; // задаем текстом div'a значение поля, которое "прослушиваем"
+      sendValues()
+    }
+  )
+document.getElementById('mom_pix').addEventListener // добавляем событие
+  (
+    'input', // на ввод
+    function name(e){ // задаём имя, чтобы потом можно было сбросить  выполнение функции на событие
+      document.getElementById('box-0').innerText = this.value; // задаем текстом div'a значение поля, которое "прослушиваем"
       sendValues()
     }
   )

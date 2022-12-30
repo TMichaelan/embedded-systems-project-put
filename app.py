@@ -20,6 +20,7 @@ v1 = 0
 h2 = 0
 s2 = 0
 v2 = 0
+mp = 20
 showContours = False
 
 def getFramesGenerator():
@@ -63,7 +64,7 @@ def getFramesGenerator():
                         cv2.line(frame, (cx, 0), (cx, height), (0, 255, 0), 1)  # рисуем линию линию по x
                         cv2.line(frame, (0, cy), (width, cy), (0, 255, 0), 1)  # линия по y
 
-                if iSee:    # если был найден объект
+                if iSee and stgs.MODE != 3:    # если был найден объект
                     controlY = 0.5  # начинаем ехать вперед с 50% мощностью 
                 else:
                     controlY = 0.0  # останавливаемся
@@ -101,7 +102,7 @@ def getFramesGenerator():
                         maxc = max(contours, key=cv2.contourArea)  # находим наибольший контур
                         moments = cv2.moments(maxc)  # получаем моменты этого контура
 
-                        if moments["m00"] > 20:  # контуры с площадью меньше 20 пикселей не будут учитываться
+                        if moments["m00"] > stgs.MOMENTS_PIXELS:  # контуры с площадью меньше 20 пикселей не будут учитываться
                             cx = int(moments["m10"] / moments["m00"])  # находим координаты центра контура по x
                             cy = int(moments["m01"] / moments["m00"])  # находим координаты центра контура по y
 
@@ -133,6 +134,8 @@ def changeHSV():
 
         elif "BINARY_TWO" in line:
             lines[i] = f"BINARY_TWO = {(h2,s2,v2)}\n"
+        elif "MOMENTS_PIXELS" in line:
+            lines[i] = f"MOMENTS_PIXELS = {mp}\n"
 
     with open("settings.py", "w") as f:
         f.writelines(lines)
@@ -163,10 +166,11 @@ elif stgs.MODE == 3:
     
     @app.route("/process", methods=["POST"])
     def process():
-        global h1,s1,v1,h2,s2,v2,showContours
+        global h1,s1,v1,h2,s2,v2,showContours,mp
         # Получаем данные из запроса
         data = request.get_json()
         # Извлекаем значения слайдеров
+        mp = data["slider0"]
         h1 = data["slider1"]
         s1 = data["slider2"]
         v1 = data["slider3"]

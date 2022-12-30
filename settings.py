@@ -1,4 +1,4 @@
-MODE = 3 # 0 - управлять джойстиком , 1 - следовать за цветом, 3 - debug
+MODE = 0 # 0 - управлять джойстиком , 1 - следовать за цветом, 3 - debug
 
 FPS_LIMIT = False
 FPS_LIMIT_VALUE = 0.01
@@ -8,9 +8,9 @@ FRAME_HEIGHT = 240 #240
 FRAME_RESOLUTION = (320, 240)  #180,120 (если видео тупит, можно уменьшить еще больше)
 
 
-BINARY_ONE = ('35', '116', '64')
-BINARY_TWO = ('255', '197', '255')
-MOMENTS_PIXELS = 20  # контуры с площадью меньше 20 пикселей не будут учитываться
+BINARY_ONE = ('42', '77', '128')
+BINARY_TWO = ('130', '255', '255')
+MOMENTS_PIXELS = 30
 
 SPEED_SCALE = 1.0  # speed (%) (0.50 = 50%) 
 MAX_ABS_SPEED = 100  # max abs speed
