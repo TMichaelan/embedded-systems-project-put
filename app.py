@@ -159,64 +159,34 @@ elif stgs.MODE == 1:
         return render_template('index1.html')
 
 
-# elif stgs.MODE == 3:
+elif stgs.MODE == 3:
     
-#     @app.route("/process", methods=["POST"])
-#     def process():
-#         global h1,s1,v1,h2,s2,v2,showContours
-#         # Получаем данные из запроса
-#         data = request.get_json()
-#         # Извлекаем значения слайдеров
-#         h1 = data["slider1"]
-#         s1 = data["slider2"]
-#         v1 = data["slider3"]
-#         h2 = data["slider4"]
-#         s2 = data["slider5"]
-#         v2 = data["slider6"]
-#         showContours = data["slider7"]
-#         vv = data["slider8"]
-#         if vv:
-#             changeHSV()
+    @app.route("/process", methods=["POST"])
+    def process():
+        global h1,s1,v1,h2,s2,v2,showContours
+        # Получаем данные из запроса
+        data = request.get_json()
+        # Извлекаем значения слайдеров
+        h1 = data["slider1"]
+        s1 = data["slider2"]
+        v1 = data["slider3"]
+        h2 = data["slider4"]
+        s2 = data["slider5"]
+        v2 = data["slider6"]
+        showContours = data["slider7"]
+        vv = data["slider8"]
+        if vv:
+            changeHSV()
 
-#         return 'Success'
+        return 'Success'
 
-#     @app.route('/')
-#     def index():
-#         return render_template('settings.html')
-
-#     @app.route('/binary_feed')
-#     def binary_feed():  
-#         return Response(getFramesGenerator(), mimetype='multipart/x-mixed-replace; boundary=binary')
-
-@app.route("/process", methods=["POST"])
-def process():
-    global h1,s1,v1,h2,s2,v2,showContours
-    # Получаем данные из запроса
-    data = request.get_json()
-    # Извлекаем значения слайдеров
-    h1 = data["slider1"]
-    s1 = data["slider2"]
-    v1 = data["slider3"]
-    h2 = data["slider4"]
-    s2 = data["slider5"]
-    v2 = data["slider6"]
-    showContours = data["slider7"]
-    vv = data["slider8"]
-    if vv:
-        changeHSV()
-    return 'Success'
-
-@app.route('/')
-def index():
-    return render_template('settings.html')
+    @app.route('/')
+    def index():
+        return render_template('settings.html')
 
 @app.route('/binary_feed')
 def binary_feed():  
     return Response(getFramesGenerator(), mimetype='multipart/x-mixed-replace; boundary=binary')
-
-
-
-
 
 if __name__ == '__main__':
    
