@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+
+.body {
+  background: rgba(5, 17, 56, 0.089);
+}
+.sliderr {
+	display: flex;
+	margin-top: 10px;
+}
+
+.videos{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#videoContainer {
+		background-color: #00000000;
+    margin-left: 5px;
+    border-color: rgb(0, 22, 119);
+    border-width: 10px;
+
+	}
+	
+	#video {
+		width: 640px;
+		height: 480px;
+		display: block;
+		margin: auto;
+	}
+
+</style>
+</head>
+<body>
+
+<h1>Settings</h1>
+<div>
+  Show contours:
+  <input type="checkbox" id="showConts" name="showConts" checked onchange="checkbox()">
+</div>
+<div class="sliderr" >
+h1:
+<input id="num-1" type="range" min="0" value="0" max="255">
+<div id="box-1">0</div>
+</div>
+<div class="sliderr" >
+s1:
+<input id="num-2" type="range" min="0" value="0" max="255">
+<div id="box-2">0</div>
+</div>
+<div class="sliderr" >
+v1:
+<input id="num-3" type="range" min="0" value="0" max="255">
+<div id="box-3">0</div>
+</div>
+<div class="sliderr" >
+h2:
+<input id="num-4" type="range" min="0" value="255" max="255">
+<div id="box-4">255</div>
+</div>
+<div class="sliderr" >
+s2:
+<input id="num-5" type="range" min="0" value="255" max="255">
+<div id="box-5">255</div>
+</div>
+<div class="sliderr" >
+v2:
+<input id="num-6" type="range" min="0" value="255" max="255">
+<div id="box-6">255</div>
+</div>
+
+<!-- <button onclick="sendHSV()">Send HSV</button> -->
+<input type="button" value="Send HSV" onclick="sendHSV()">
+
+<div class="videos">
+  <div id="videoContainer"><img id="video" src="{{ url_for('video_feed') }}"></div>
+  <div id="videoContainer"><img id="video" src="{{ url_for('binary_feed') }}"></div>  
+</div>
+
+
+<script>
+
+  
+  let chval = false
+  let sendColors = false
+  function sendHSV(){
+    sendColors = true
+    sendValues()
+    sendColors = false
+  }
+
+  function checkbox() {
+    var chbox;
+    chbox=document.getElementById('showConts');
+      if (chbox.checked) {
+        chval = true
+        sendValues()
+      }
+      else {
+        chval = false
+        sendValues()
+      }
+  }
+
+
+  function sendValues() {
+  // Получаем значения слайдеров
+  var slider1 = document.getElementById("num-1").value;
+  var slider2 = document.getElementById("num-2").value;
+  var slider3 = document.getElementById("num-3").value;
+  var slider4 = document.getElementById("num-4").value;
+  var slider5 = document.getElementById("num-5").value;
+  var slider6 = document.getElementById("num-6").value;
+  var slider7 = chval;
+  var slider8 = sendColors;
+
+  // Создаем объект XMLHttpRequest
+  var xhr = new XMLHttpRequest();
+
+  // Настраиваем запрос
+  xhr.open("POST", "/process", true);
+  xhr.setRequestHeader("Content-Type", "application/json");
+
+  // Отправляем данные в формате JSON
+  xhr.send(JSON.stringify({
+    slider1: slider1,
+    slider2: slider2,
+    slider3: slider3,
+    slider4: slider4,
+    slider5: slider5,
+    slider6: slider6,
+    slider7: slider7,
+    slider8: slider8
+  }));
+
+  
+}
+
+</script>
+
+<script>
+
+
+// document.getElementById('showConts').addEventListener // добавляем событие
+//   (
+//     'input', // на ввод
+//     function name(e){ // задаём имя, чтобы потом можно было сбросить  выполнение функции на событие
+//       document.getElementById('showConts').innerText = this.value; // задаем текстом div'a значение поля, которое "прослушиваем"
+//       sendValues()
+//     }
+//   )
+
+document.getElementById('num-1').addEventListener // добавляем событие
+  (
+    'input', // на ввод
+    function name(e){ // задаём имя, чтобы потом можно было сбросить  выполнение функции на событие
+      document.getElementById('box-1').innerText = this.value; // задаем текстом div'a значение поля, которое "прослушиваем"
+      sendValues()
+    }
+  )
+		
+document.getElementById('num-2').addEventListener // добавляем событие
+  (
+    'input', // на ввод
+    function name(e){ // задаём имя, чтобы потом можно было сбросить  выполнение функции на событие
+      document.getElementById('box-2').innerText = this.value; // задаем текстом div'a значение поля, которое "прослушиваем"
+      sendValues()
+    }
+  )
+		
+document.getElementById('num-3').addEventListener // добавляем событие
+  (
+    'input', // на ввод
+    function name(e){ // задаём имя, чтобы потом можно было сбросить  выполнение функции на событие
+      document.getElementById('box-3').innerText = this.value; // задаем текстом div'a значение поля, которое "прослушиваем"
+      sendValues()
+    }
+  )
+		
+document.getElementById('num-4').addEventListener // добавляем событие
+  (
+    'input', // на ввод
+    function name(e){ // задаём имя, чтобы потом можно было сбросить  выполнение функции на событие
+      document.getElementById('box-4').innerText = this.value; // задаем текстом div'a значение поля, которое "прослушиваем"
+      sendValues()
+    }
+  )
+document.getElementById('num-5').addEventListener // добавляем событие
+  (
+    'input', // на ввод
+    function name(e){ // задаём имя, чтобы потом можно было сбросить  выполнение функции на событие
+      document.getElementById('box-5').innerText = this.value; // задаем текстом div'a значение поля, которое "прослушиваем"
+      sendValues()
+    }
+  )
+document.getElementById('num-6').addEventListener // добавляем событие
+  (
+    'input', // на ввод
+    function name(e){ // задаём имя, чтобы потом можно было сбросить  выполнение функции на событие
+      document.getElementById('box-6').innerText = this.value; // задаем текстом div'a значение поля, которое "прослушиваем"
+      sendValues()
+    }
+  )
+</script>
+
+</body>
+</html>
