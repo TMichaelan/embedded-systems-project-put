@@ -4,6 +4,7 @@
 <h1 align="center">
   <img src=https://github.com/TMichaelan/embedded-systems-project/blob/main/img/robot.jpg?raw=true width="800">
   <br>
+  <img src=https://github.com/TMichaelan/embedded-systems-project/blob/main/img/binary.png?raw=true width="800">
 </h1>    
 
 ## Main components:
@@ -50,3 +51,6 @@ Example:
 ```
 192.168.1.64:5000
 ```
+
+ ## <a href="https://youtu.be/yCCHGjytB-s">demo video</a>
+
