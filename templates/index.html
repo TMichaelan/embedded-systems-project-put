@@ -1,4 +1,4 @@
-y<!doctype html>
+<!doctype html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
@@ -17,7 +17,7 @@ y<!doctype html>
 		background-color: #000000;
 	}
 	
-	#videoContainer {
+	#vContainer {
 		background-color: #00000000;
 	}
 	
@@ -28,21 +28,21 @@ y<!doctype html>
 		margin: auto;
 	}
 
-	#joyDiv {
-		width: max(33vw, 33vh);
-		height: max(33vw, 33vh);
-		max-width: 400px;
-		max-height: 400px;
+	#joyBox {
 		position: absolute;
 		bottom: 0%;
 		right: 0%;
+		width: max(30vw, 30vh);
+		height: max(30vw, 30vh);
+		max-width: 350px;
+		max-height: 350px;		
 	}
 		
 	</style>
 </head>
 <body>
-	<div id="videoContainer"><img id="video" src="{{ url_for('video_feed') }}"></div>
-	<div id="joyDiv"></div>
+	<div id="vContainer"><img id="video" src="{{ url_for('video_feed') }}"></div>
+	<div id="joyBox"></div>
 	<!-- <script type="text/javascript"></script> -->
 
 	<script type="text/javascript">
@@ -51,16 +51,14 @@ y<!doctype html>
 						"internalFillColor": "#FF0000", 
 						"externalStrokeColor": "#800000", 
 						"externalLineWidth": "5"};
-		var joy = new JoyStick('joyDiv', joyParam);
+		var joy = new JoyStick('joyBox', joyParam);
 		
 		function control(x, y){
 			var xhttp = new XMLHttpRequest();
 			xhttp.open("GET", "control?x=" + x +"&y="+y, true); 
 			xhttp.send();
 		}
-		
-		setInterval(function(){control(joy.GetX(), joy.GetY());}, 50);
-		
+		setInterval(function(){control(joy.GetX(), joy.GetY());}, 20);		
 	</script>
 	
 </body>

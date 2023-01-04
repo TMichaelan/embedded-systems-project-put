@@ -17,7 +17,7 @@ y<!doctype html>
 		background-color: #000000;
 	}
 	
-	#videoContainer {
+	#vContainer {
 		background-color: #00000000;
 	}
 	
@@ -31,9 +31,6 @@ y<!doctype html>
 	</style>
 </head>
 <body>
-	<div id="videoContainer"><img id="video" src="{{ url_for('video_feed') }}"></div>
-	<div id="joyDiv"></div>
-	<script type="text/javascript"></script>
-
+	<div id="vContainer"><img id="video" src="{{ url_for('video_feed') }}"></div>
 </body>
 </html>
