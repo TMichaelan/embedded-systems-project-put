@@ -9,11 +9,11 @@ import settings as stgs
 import numpy as np
 app = Flask(__name__)
 
-camera = cv2.VideoCapture(0) 
-camera.set(cv2.CAP_PROP_FRAME_WIDTH, stgs.FRAME_WIDTH) 
-camera.set(cv2.CAP_PROP_FRAME_HEIGHT, stgs.FRAME_HEIGHT) 
+cam = cv2.VideoCapture(0) 
+cam.set(cv2.CAP_PROP_FRAME_WIDTH, stgs.FRAME_WIDTH) 
+cam.set(cv2.CAP_PROP_FRAME_HEIGHT, stgs.FRAME_HEIGHT) 
 
-controlX, controlY = 0.0, 0.0
+axisX, axisY = 0.0, 0.0
 h1 = 0
 s1 = 0
 v1 = 0
@@ -23,9 +23,9 @@ v2 = 0
 mp = 20
 showContours = False
 
-def getFramesGenerator():
+def getFrames():
 
-    global controlX, controlY
+    global axisX, axisY
     while True:
 
         if stgs.FPS_LIMIT:
@@ -33,7 +33,7 @@ def getFramesGenerator():
         
         iSee = False  
        
-        success, frame = camera.read() 
+        success, frame = cam.read() 
 
         if success:
             frame = cv2.resize(frame, stgs.FRAME_RESOLUTION, interpolation=cv2.INTER_AREA) 
@@ -45,40 +45,39 @@ def getFramesGenerator():
                 h_min = np.array(stgs.BINARY_ONE, np.uint8)
                 h_max = np.array(stgs.BINARY_TWO, np.uint8)
                 binary = cv2.inRange(hsv, h_min, h_max)
-
                 contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE) 
 
                 if len(contours) != 0:  
-                    maxc = max(contours, key=cv2.contourArea)  # находим наибольший контур
-                    moments = cv2.moments(maxc)  # получаем моменты этого контура
+                    maxc = max(contours, key=cv2.contourArea)  
+                    moments = cv2.moments(maxc)  
 
                     if moments["m00"] > stgs.MOMENTS_PIXELS:  
-                        cx = int(moments["m10"] / moments["m00"])  # координаты центра контура по x
-                        cy = int(moments["m01"] / moments["m00"])  # координаты центра контура по y
+                        cx = int(moments["m10"] / moments["m00"])  
+                        cy = int(moments["m01"] / moments["m00"])  
 
                         iSee = True
 
-                        controlX = 2 * (cx - width / 2) / width  # находим отклонение найденного объекта от центра кадра и нормализуем его (приводим к диапазону [-1; 1])
+                        axisX = 2 * (cx - width / 2) / width 
 
-                        cv2.drawContours(frame, maxc, -1, (0, 255, 0), 1)  # рисуем контур
-                        cv2.line(frame, (cx, 0), (cx, height), (0, 255, 0), 1)  # рисуем линию линию по x
-                        cv2.line(frame, (0, cy), (width, cy), (0, 255, 0), 1)  # линия по y
+                        cv2.drawContours(frame, maxc, -1, (0, 255, 0), 1)  
+                        cv2.line(frame, (cx, 0), (cx, height), (0, 255, 0), 1)  
+                        cv2.line(frame, (0, cy), (width, cy), (0, 255, 0), 1)  
 
-                if iSee and stgs.MODE != 3:    # если был найден объект
-                    controlY = 0.5  # начинаем ехать вперед с 50% мощностью 
+                if iSee and stgs.MODE != 3:    
+                    axisY = 0.5  
                 else:
-                    controlY = 0.0  # останавливаемся
-                    controlX = 0.0  # сбрасываем меру поворота
+                    axisY = 0.0  
+                    axisX = 0.0  
 
-                miniBin = cv2.resize(binary, (int(binary.shape[1] / 4), int(binary.shape[0] / 4)),  # накладываем поверх
-                                    interpolation=cv2.INTER_AREA)                                  # кадра маленькую
-                miniBin = cv2.cvtColor(miniBin, cv2.COLOR_GRAY2BGR)                                 # битовую маску
-                frame[-2 - miniBin.shape[0]:-2, 2:2 + miniBin.shape[1]] = miniBin             # для наглядности
+                miniBin = cv2.resize(binary, (int(binary.shape[1] / 4), int(binary.shape[0] / 4)),  
+                                    interpolation=cv2.INTER_AREA)                                  
+                miniBin = cv2.cvtColor(miniBin, cv2.COLOR_GRAY2BGR)                                 
+                frame[-2 - miniBin.shape[0]:-2, 2:2 + miniBin.shape[1]] = miniBin             
 
                 cv2.putText(frame, 'iSee: {};'.format(iSee), (width - 120, height - 5),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.25, (255, 0, 0), 1, cv2.LINE_AA)  # добавляем поверх кадра текст
-                cv2.putText(frame, 'controlX: {:.2f}'.format(controlX), (width - 70, height - 5),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.25, (255, 0, 0), 1, cv2.LINE_AA)  # добавляем поверх кадра текст
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.25, (255, 0, 0), 1, cv2.LINE_AA)  
+                cv2.putText(frame, 'axisX: {:.2f}'.format(axisX), (width - 70, height - 5),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.25, (255, 0, 0), 1, cv2.LINE_AA)  
                 
 
                 _, buffer = cv2.imencode('.jpg', frame)
@@ -90,30 +89,30 @@ def getFramesGenerator():
 
             elif stgs.MODE == 3:
         
-                hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)  # переводим кадр из RGB в HSV
+                hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)  
                 h_min = np.array((h1, s1, v1), np.uint8)
                 h_max = np.array((h2, s2, v2), np.uint8)
-                binary = cv2.inRange(hsv, h_min, h_max)  # пороговая обработка кадра (выделяем все желтое)
+                binary = cv2.inRange(hsv, h_min, h_max)  
 
                 if showContours:
-                    contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)  # получаем контуры выделенных областей
+                    contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)  
 
-                    if len(contours) != 0:  # если найден хоть один контур
-                        maxc = max(contours, key=cv2.contourArea)  # находим наибольший контур
-                        moments = cv2.moments(maxc)  # получаем моменты этого контура
+                    if len(contours) != 0:  
+                        maxc = max(contours, key=cv2.contourArea) 
+                        moments = cv2.moments(maxc)  
 
-                        if moments["m00"] > stgs.MOMENTS_PIXELS:  # контуры с площадью меньше 20 пикселей не будут учитываться
-                            cx = int(moments["m10"] / moments["m00"])  # находим координаты центра контура по x
-                            cy = int(moments["m01"] / moments["m00"])  # находим координаты центра контура по y
+                        if moments["m00"] > stgs.MOMENTS_PIXELS:  
+                            cx = int(moments["m10"] / moments["m00"])  
+                            cy = int(moments["m01"] / moments["m00"])  
 
-                            iSee = True  # устанавливаем флаг, что контур найден
+                            iSee = True  
 
-                            controlX = 2 * (cx - width / 2) / width  # находим отклонение найденного объекта от центра кадра и
-                            # нормализуем его (приводим к диапазону [-1; 1])
+                            axisX = 2 * (cx - width / 2) / width 
+                            
 
-                            cv2.drawContours(frame, maxc, -1, (0, 255, 0), 1)  # рисуем контур
-                            cv2.line(frame, (cx, 0), (cx, height), (0, 255, 0), 1)  # рисуем линию линию по x
-                            cv2.line(frame, (0, cy), (width, cy), (0, 255, 0), 1)  # линия по y
+                            cv2.drawContours(frame, maxc, -1, (0, 255, 0), 1)  
+                            cv2.line(frame, (cx, 0), (cx, height), (0, 255, 0), 1)  
+                            cv2.line(frame, (0, cy), (width, cy), (0, 255, 0), 1)  
 
                 _, buffer = cv2.imencode('.jpg', frame)
                 _, binary_buffer = cv2.imencode(".jpg", binary)
@@ -129,7 +128,6 @@ def changeHSV():
 
     for i, line in enumerate(lines):
         if "BINARY_ONE" in line:
-            # Заменяем значение переменной
             lines[i] = f"BINARY_ONE = {(h1,s1,v1)}\n"
 
         elif "BINARY_TWO" in line:
@@ -143,7 +141,7 @@ def changeHSV():
 
 @app.route('/video_feed')
 def video_feed():
-    return Response(getFramesGenerator(), mimetype='multipart/x-mixed-replace; boundary=frame')
+    return Response(getFrames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 if stgs.MODE == 0:
     @app.route('/')
@@ -152,8 +150,8 @@ if stgs.MODE == 0:
 
     @app.route('/control')
     def control():
-        global controlX, controlY
-        controlX, controlY = float(request.args.get('x')) / 100.0, float(request.args.get('y')) / 100.0
+        global axisX, axisY
+        axisX, axisY = float(request.args.get('x')) / 100.0, float(request.args.get('y')) / 100.0
         return '', 200, {'Content-Type': 'text/plain'}
 
 elif stgs.MODE == 1:  
@@ -167,9 +165,9 @@ elif stgs.MODE == 3:
     @app.route("/process", methods=["POST"])
     def process():
         global h1,s1,v1,h2,s2,v2,showContours,mp
-        # Получаем данные из запроса
+        
         data = request.get_json()
-        # Извлекаем значения слайдеров
+       
         mp = data["slider0"]
         h1 = data["slider1"]
         s1 = data["slider2"]
@@ -190,7 +188,7 @@ elif stgs.MODE == 3:
 
 @app.route('/binary_feed')
 def binary_feed():  
-    return Response(getFramesGenerator(), mimetype='multipart/x-mixed-replace; boundary=binary')
+    return Response(getFrames(), mimetype='multipart/x-mixed-replace; boundary=binary')
 
 if __name__ == '__main__':
    
@@ -213,10 +211,10 @@ if __name__ == '__main__':
     serialPort = serial.Serial(args.serial, stgs.SERIAL_UART)  
 
     def sender():
-        global controlX, controlY
+        global axisX, axisY
         while True:
-            speedA = maxAbsSpeed * (controlY + controlX)    
-            speedB = maxAbsSpeed * (controlY - controlX)    
+            speedA = maxAbsSpeed * (axisY + axisX)    
+            speedB = maxAbsSpeed * (axisY - axisX)    
 
             speedA = max(-maxAbsSpeed, min(speedA, maxAbsSpeed))   
             speedB = max(-maxAbsSpeed, min(speedB, maxAbsSpeed))    
