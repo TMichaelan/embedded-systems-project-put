@@ -191,25 +191,28 @@ def binary_feed():
 
 if __name__ == '__main__':
    
+    
     uart_msg = {
         "speed_left": 0,  
         "speed_right": 0  
     }
 
     
+   
     speed_scale = stgs.SPEED_SCALE 
     max_absolute_sp = stgs.MAX_ABS_SPEED  
-    sendFreq = stgs.SEND_FREQ  
+    send_freq = stgs.SEND_FREQ  
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-p', '--port', type=int, default=stgs.PORT, help="Running port")
-    parser.add_argument("-i", "--ip", type=str, default=stgs.IP, help="Ip address")
-    parser.add_argument('-s', '--serial', type=str, default=stgs.SERIAL_PT, help="Serial port")
-    args = parser.parse_args()
 
+
+    arg_parser = argparse.ArgumentParser()
+    arg_parser.add_argument('-p', '--port', type=int, default=stgs.PORT, help="Running port")
+    arg_parser.add_argument("-i", "--ip", type=str, default=stgs.IP, help="IP address")
+    arg_parser.add_argument('-s', '--serial', type=str, default=stgs.SERIAL_PT, help="Serial port")
+    args = arg_parser.parse_args()
     serialPort = serial.Serial(args.serial, stgs.SERIAL_UART)  
 
-    def sender():
+    def uart_send():
         global axisX, axisY
 
 
@@ -223,9 +226,9 @@ if __name__ == '__main__':
             uart_msg["speed_left"], uart_msg["speed_right"] = speed_scale * speed_left, speed_scale * speed_right 
 
             serialPort.write(json.dumps(uart_msg, ensure_ascii=False).encode("utf8")) 
-            time.sleep(1 / sendFreq)
+            time.sleep(1 / send_freq)
 
 
 
-    threading.Thread(target=sender, daemon=True).start()    
+    threading.Thread(target=uart_send, daemon=True).start()    
     app.run(debug=False, host=args.ip, port=args.port)  
