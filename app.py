@@ -31,7 +31,7 @@ def getFrames():
         if stgs.FPS_LIMIT:
             time.sleep(stgs.FPS_LIMIT_VALUE) 
         
-        iSee = False  
+        seeObj = False  
        
         success, frame = cam.read() 
 
@@ -45,41 +45,37 @@ def getFrames():
                 h_min = np.array(stgs.BINARY_ONE, np.uint8)
                 h_max = np.array(stgs.BINARY_TWO, np.uint8)
                 binary = cv2.inRange(hsv, h_min, h_max)
-                contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE) 
+                conts, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE) 
 
-                if len(contours) != 0:  
-                    maxc = max(contours, key=cv2.contourArea)  
-                    moments = cv2.moments(maxc)  
+                if len(conts) != 0:  
+                    max_conts = max(conts, key=cv2.contourArea)  
+                    mom_conts = cv2.mom_conts(max_conts)  
 
-                    if moments["m00"] > stgs.MOMENTS_PIXELS:  
-                        cx = int(moments["m10"] / moments["m00"])  
-                        cy = int(moments["m01"] / moments["m00"])  
+                    if mom_conts["m00"] > stgs.MOMENTS_PIXELS:  
+                        x_conts = int(mom_conts["m10"] / mom_conts["m00"])  
+                        y_conts = int(mom_conts["m01"] / mom_conts["m00"])  
+                        seeObj = True
+                        axisX = 2 * (x_conts - width / 2) / width 
+                        cv2.drawContours(frame, max_conts, -1, (0, 255, 0), 1)  
+                        cv2.line(frame, (x_conts, 0), (x_conts, height), (0, 255, 0), 1)  
+                        cv2.line(frame, (0, y_conts), (width, y_conts), (0, 255, 0), 1)  
 
-                        iSee = True
-
-                        axisX = 2 * (cx - width / 2) / width 
-
-                        cv2.drawContours(frame, maxc, -1, (0, 255, 0), 1)  
-                        cv2.line(frame, (cx, 0), (cx, height), (0, 255, 0), 1)  
-                        cv2.line(frame, (0, cy), (width, cy), (0, 255, 0), 1)  
-
-                if iSee and stgs.MODE != 3:    
+                if seeObj and stgs.MODE != 3:    
                     axisY = 0.5  
                 else:
                     axisY = 0.0  
                     axisX = 0.0  
 
-                miniBin = cv2.resize(binary, (int(binary.shape[1] / 4), int(binary.shape[0] / 4)),  
+                binary_shape = cv2.resize(binary, (int(binary.shape[1] / 4), int(binary.shape[0] / 4)),  
                                     interpolation=cv2.INTER_AREA)                                  
-                miniBin = cv2.cvtColor(miniBin, cv2.COLOR_GRAY2BGR)                                 
-                frame[-2 - miniBin.shape[0]:-2, 2:2 + miniBin.shape[1]] = miniBin             
+                binary_shape = cv2.cvtColor(binary_shape, cv2.COLOR_GRAY2BGR)                                 
+                frame[-2 - binary_shape.shape[0]:-2, 2:2 + binary_shape.shape[1]] = binary_shape             
 
-                cv2.putText(frame, 'iSee: {};'.format(iSee), (width - 120, height - 5),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.25, (255, 0, 0), 1, cv2.LINE_AA)  
-                cv2.putText(frame, 'axisX: {:.2f}'.format(axisX), (width - 70, height - 5),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.25, (255, 0, 0), 1, cv2.LINE_AA)  
+                # cv2.putText(frame, 'seeObj: {};'.format(seeObj), (width - 120, height - 5),
+                #             cv2.FONT_HERSHEY_SIMPLEX, 0.25, (255, 0, 0), 1, cv2.LINE_AA)  
+                # cv2.putText(frame, 'axisX: {:.2f}'.format(axisX), (width - 70, height - 5),
+                #             cv2.FONT_HERSHEY_SIMPLEX, 0.25, (255, 0, 0), 1, cv2.LINE_AA)  
                 
-
                 _, buffer = cv2.imencode('.jpg', frame)
                 yield (b'--frame\r\n' b'Content-Type: image/jpeg\r\n\r\n' + buffer.tobytes() + b'\r\n')
 
@@ -95,24 +91,20 @@ def getFrames():
                 binary = cv2.inRange(hsv, h_min, h_max)  
 
                 if showContours:
-                    contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)  
+                    conts, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)  
 
-                    if len(contours) != 0:  
-                        maxc = max(contours, key=cv2.contourArea) 
-                        moments = cv2.moments(maxc)  
+                    if len(conts) != 0:  
+                        max_conts = max(conts, key=cv2.contourArea) 
+                        mom_conts = cv2.mom_conts(max_conts)  
 
-                        if moments["m00"] > stgs.MOMENTS_PIXELS:  
-                            cx = int(moments["m10"] / moments["m00"])  
-                            cy = int(moments["m01"] / moments["m00"])  
-
-                            iSee = True  
-
-                            axisX = 2 * (cx - width / 2) / width 
-                            
-
-                            cv2.drawContours(frame, maxc, -1, (0, 255, 0), 1)  
-                            cv2.line(frame, (cx, 0), (cx, height), (0, 255, 0), 1)  
-                            cv2.line(frame, (0, cy), (width, cy), (0, 255, 0), 1)  
+                        if mom_conts["m00"] > stgs.MOMENTS_PIXELS:  
+                            x_conts = int(mom_conts["m10"] / mom_conts["m00"])  
+                            y_conts = int(mom_conts["m01"] / mom_conts["m00"])  
+                            seeObj = True  
+                            axisX = 2 * (x_conts - width / 2) / width 
+                            cv2.drawContours(frame, max_conts, -1, (0, 255, 0), 1)  
+                            cv2.line(frame, (x_conts, 0), (x_conts, height), (0, 255, 0), 1)  
+                            cv2.line(frame, (0, y_conts), (width, y_conts), (0, 255, 0), 1)  
 
                 _, buffer = cv2.imencode('.jpg', frame)
                 _, binary_buffer = cv2.imencode(".jpg", binary)
