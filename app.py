@@ -179,7 +179,6 @@ elif stgs.MODE == 3:
         vv = data["slider8"]
         if vv:
             changeHSV()
-
         return 'Success'
 
     @app.route('/')
@@ -192,14 +191,14 @@ def binary_feed():
 
 if __name__ == '__main__':
    
-    msg = {
-        "speedA": 0,  
-        "speedB": 0  
+    uart_msg = {
+        "speed_left": 0,  
+        "speed_right": 0  
     }
 
     
-    speedScale = stgs.SPEED_SCALE 
-    maxAbsSpeed = stgs.MAX_ABS_SPEED  
+    speed_scale = stgs.SPEED_SCALE 
+    max_absolute_sp = stgs.MAX_ABS_SPEED  
     sendFreq = stgs.SEND_FREQ  
 
     parser = argparse.ArgumentParser()
@@ -212,18 +211,21 @@ if __name__ == '__main__':
 
     def sender():
         global axisX, axisY
+
+
         while True:
-            speedA = maxAbsSpeed * (axisY + axisX)    
-            speedB = maxAbsSpeed * (axisY - axisX)    
+            speed_left = max_absolute_sp * (axisY + axisX)    
+            speed_right = max_absolute_sp * (axisY - axisX)    
 
-            speedA = max(-maxAbsSpeed, min(speedA, maxAbsSpeed))   
-            speedB = max(-maxAbsSpeed, min(speedB, maxAbsSpeed))    
+            speed_left = max(-max_absolute_sp, min(speed_left, max_absolute_sp))   
+            speed_right = max(-max_absolute_sp, min(speed_right, max_absolute_sp))    
 
-            msg["speedA"], msg["speedB"] = speedScale * speedA, speedScale * speedB 
+            uart_msg["speed_left"], uart_msg["speed_right"] = speed_scale * speed_left, speed_scale * speed_right 
 
-            serialPort.write(json.dumps(msg, ensure_ascii=False).encode("utf8")) 
+            serialPort.write(json.dumps(uart_msg, ensure_ascii=False).encode("utf8")) 
             time.sleep(1 / sendFreq)
 
-    threading.Thread(target=sender, daemon=True).start()    
 
+
+    threading.Thread(target=sender, daemon=True).start()    
     app.run(debug=False, host=args.ip, port=args.port)  
